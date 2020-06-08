@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="rspec" tests="2" skipped="0" failures="0" errors="0" time="0.089509" timestamp="2020-06-08T18:47:24+09:00" hostname="ShunnoMacBook-Pro.local">
+<properties>
+<property name="seed" value="44427"/>
+</properties>
+<testcase classname="spec.models.user_spec" name="User バリデーション nameの値が空の場合、エラーを返すこと" file="./spec/models/user_spec.rb" time="0.085451"></testcase>
+<testcase classname="spec.models.user_spec" name="User バリデーション emailの値が空の場合、エラーを返すこと" file="./spec/models/user_spec.rb" time="0.001576"></testcase>
+</testsuite>
