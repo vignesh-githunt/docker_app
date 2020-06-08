@@ -1,66 +1,66 @@
-version: 2.1
+version: 2
 jobs:
-  test:
+  build:
     docker:
-      - image: circleci/ruby:2.6.3-node-browsers
-        environment:
-          RAILS_ENV: test
-      - image: circleci/mysql:5.6
-        environment:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: myapp_test
-    working_directory: ~/repo
+    - image: circleci/ruby:2.5.3-node-browsers
+      environment:
+        - BUNDLER_VERSION: 2.0.2
+        - RAILS_ENV: 'test'
+    - image: circleci/mysql:5.7
+      environment:
+        - MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+        - MYSQL_ROOT_HOST: '127.0.0.1'
+
+    working_directory: ~/docker_app  #自身のアプリディレクトリ名を設定  
+
+
     steps:
-      - checkout
-      - restore_cache:
+    - checkout
+
+    - restore_cache:
         keys:
-          - rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
-          - rails-demo-bundle-v2-
+        - v1-dependencies-{{ checksum "Gemfile.lock" }}
+        - v1-dependencies-
 
-      - run:
-          name: バンドルインストール
-          command: bundle check || bundle install
+    - run:
+        name: install dependencies
+        command: |
+          gem install bundler -v 2.0.2
+          bundle install --jobs=4 --retry=3 --path vendor/bundle
 
-      - save_cache:
-        key: rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
+    - save_cache:
         paths:
-          - vendor/bundle
-  
-  
-            - restore_cache:
-          keys:
-            - rails-demo-yarn-{{ checksum "yarn.lock" }}
-            - rails-demo-yarn-
+        - ./vendor/bundle
+        key: v1-dependencies-{{ checksum "Gemfile.lock" }}
 
-      - run:
-          name: Yarn をインストール
-          command: yarn install --cache-folder ~/.cache/yarn
+    # Database setup
+    - run: mv ./config/database.yml.ci ./config/database.yml
 
-      # Yarn または Webpacker のキャッシュを保存します
+    # Database setup
+    - run:
+        name: Databasesetup
+        command: |
+           bundle exec rake db:create
+           bundle exec rake db:schema:load
 
-      - save_cache:
-          key: rails-demo-yarn-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/.cache/yarn
+    # run tests!
+    - run:
+        name: Run rspec
+        command: |
+          mkdir /tmp/test-results
+          TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | \
+            circleci tests split --split-by=timings)"
 
-      - run:
-          name: DB を待機
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+          bundle exec rspec \
+            --format progress \
+            --format RspecJunitFormatter \
+            --out /tmp/test-results/rspec.xml \
+            --format progress \
+            $TEST_FILES
 
-      - run:
-          name: データベースをセットアップ
-          command: bin/rails db:schema:load --trace
-
-      - run:
-          name: RSpec を並列実行
-          command: |
-            bundle exec rspec --profile 10 \
-                              --format RspecJunitFormatter \
-                              --out test_results/rspec.xml \
-                              --format progress \
-                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
-
-      # タイミング解析のテスト結果を保存します
-
-      - store_test_results: # テストサマリー (https://circleci.com/docs/ja/2.0/collect-test-data/) に表示するテスト結果をアップロードします
-          path: test_results
+    # collect reports
+    - store_test_results:
+        path: /tmp/test-results
+    - store_artifacts:
+        path: /tmp/test-results
+        destination: test-results
