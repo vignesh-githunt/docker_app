@@ -17,6 +17,9 @@ services:
       - public-data:/docker/public
       - tmp-data:/docker/tmp
       - log-data:/docker/log
+      - sockets:/docker/tmp/sockets
+    ports:
+      - '3000:3000'
     depends_on:
       - db
 
@@ -27,6 +30,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/docker.conf
       - public-data:/docker/public
       - tmp-data:/docker/tmp
+      - sockets:/docker/tmp/sockets
     ports:
       - 80:80
     depends_on:
@@ -36,4 +40,5 @@ volumes:
   public-data:
   tmp-data:
   log-data:
+  sockets:
     
