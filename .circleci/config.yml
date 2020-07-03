@@ -15,7 +15,7 @@ workflows:
           create-repo: true
           dockerfile: ./docker/nginx/Dockerfile
           repo: nginx
-          tag: "${CIRCLE_SHA1}"
+          tag: latest
           filters:
             branches:
               only: master
