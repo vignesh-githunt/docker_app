@@ -5,6 +5,7 @@ orbs:
 workflows:
   # Nginxのデプロイ
   nginx-deploy:
+    context: docker_app
     jobs:
       - aws-ecr/build-and-push-image:
           account-url: AWS_ECR_ACCOUNT_URL
