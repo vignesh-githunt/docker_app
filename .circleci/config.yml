@@ -7,7 +7,7 @@ workflows:
   nginx-deploy:
     jobs:
       context: docker_app
-      # - aws-ecr/build-and-push-image:
+      - aws-ecr/build-and-push-image:
       #   account-url: AWS_ECR_ACCOUNT_URL
       #   region: AWS_REGION
       #   aws-access-key-id: AWS_ACCESS_KEY_ID
