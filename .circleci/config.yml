@@ -20,6 +20,7 @@ workflows:
             branches:
               only: master
       - aws-ecs/deploy-service-update:
+          context: docker_app
           requires:
             - aws-ecr/build-and-push-image
           family: 'nginx-rails-app' # ECSのタスク定義名
