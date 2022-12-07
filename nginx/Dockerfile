@@ -1,4 +1,4 @@
-FROM nginx:stable
+FROM nginx:1.22.1
 
 RUN rm -f /etc/nginx/conf.d/*
 
